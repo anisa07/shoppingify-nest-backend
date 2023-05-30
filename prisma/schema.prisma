@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id             Int      @default(autoincrement()) @id
+  uid            String   @db.VarChar(255) @unique
+  name           String   @db.VarChar(255) @unique
+  products       Product[]
+  shoppingList   ShoppingList[]
+  recipes        Recipe[]
+}
+
+model Product {
+  id             Int      @default(autoincrement()) @id
+  name           String   @db.VarChar(255)
+  description    String   @db.VarChar(2047)
+  img            String?
+  user           User     @relation(fields: [userId], references: [uid])
+  userId         String
+  recipes        ProductOnRecipes[]
+  category       ProductCategory @relation(fields: [categoryId], references: [id])
+  categoryId     Int
+}
+
+model ProductCategory {
+  id             Int      @default(autoincrement()) @id
+  category       String   @db.VarChar(255)
+  products       Product[]
+}
+
+model ShoppingList {
+  id             Int      @default(autoincrement()) @id
+  name           String   @db.VarChar(255)
+  description    String   @db.VarChar(2047)
+  img            String?
+  user           User     @relation(fields: [userId], references: [uid])
+  userId         String
+}
+
+model Recipe {
+  id             Int      @default(autoincrement()) @id
+  name           String   @db.VarChar(255)
+  description    String   @db.VarChar(2047)
+  img            String?
+  user           User     @relation(fields: [userId], references: [uid])
+  userId         String
+  products       ProductOnRecipes[]
+}
+
+model ProductOnRecipes {
+  recipe            Recipe     @relation(fields: [recipeId], references: [id])
+  recipeId          Int // relation scalar field (used in the `@relation` attribute above)
+  product           Product    @relation(fields: [productId], references: [id])
+  productId         Int // relation scalar field (used in the `@relation` attribute above)
+  @@id([recipeId, productId])
+}
